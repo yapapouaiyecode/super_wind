@@ -1,34 +1,35 @@
-// On attend que les éléments de base du jeu soient chargés
-window.addEventListener('load', function() {
+// Ce code utilise l'API officielle de Sandboxels pour les mods
+runAfterLoad(function() {
     
-    // Définition de notre nouvel élément de vent
+    // On définit le Super Vent
     elements.super_wind = {
         color: "#aae0f0",
-        behavior: behaviors.GAS, // Il se comporte comme un gaz pour se déplacer
-        category: "energy",      // Il sera rangé dans l'onglet "Energy"
-        temp: 20,
+        behavior: behaviors.GAS, // Se comporte comme un gaz pour se propager
+        category: "energy",      // Il se rangera avec Feu, Laser, Foudre, etc.
         state: "gas",
-        density: 0.1,            // Très léger pour monter et bouger vite
+        density: 0.1,            // Très léger pour voler au milieu des nuages
+        excludeRandom: true,     // Empêche le jeu de le générer au hasard
         tick: function(pixel) {
-            // Force le déplacement des pixels voisins (effet de vent)
-            for (let i = -2; i <= 2; i++) {
-                for (let j = -2; j <= 2; j++) {
+            // Zone d'effet : le vent souffle et pousse
+            for (let i = -3; i <= 3; i++) {
+                for (let j = -3; j <= 3; j++) {
                     let neighbor = getPixel(pixel.x + i, pixel.y + j);
-                    // Si on trouve un pixel qui est un gaz ou un nuage, on le pousse vers la droite
-                    if (neighbor && (neighbor.element === "cloud" || neighbor.element === "rain_cloud" || neighbor.element === "steam" || neighbor.element === "hydrogen")) {
-                        movePixel(neighbor, pixel.x + i + 2, pixel.y + j);
+                    
+                    // Si le pixel voisin est un nuage ou un gaz, on le propulse vers la droite
+                    if (neighbor && (neighbor.element.includes("cloud") || neighbor.element === "steam" || neighbor.element === "hydrogen")) {
+                        movePixel(neighbor, pixel.x + i + 3, pixel.y + j);
                     }
                 }
             }
-            // Le vent finit par disparaître après avoir soufflé (5% de chance par frame)
-            if (Math.random() < 0.05) {
+            // Le vent se dissipe peu à peu (7% de chance par frame)
+            if (Math.random() < 0.07) {
                 deletePixel(pixel.x, pixel.y);
             }
         }
     };
 
-    // On rafraîchit le jeu pour intégrer le nouvel élément
-    if (typeof eList !== "undefined") {
+    // On s'assure que le bouton apparaît bien dans la liste du jeu
+    if (typeof eList !== "undefined" && !eList.includes("super_wind")) {
         eList.push("super_wind");
     }
 });
